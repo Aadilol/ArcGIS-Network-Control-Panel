@@ -1,3 +1,33 @@
+# Service Area Tool Documentation
+---
+# Inputs
+
+| Parameter                              | Type                      | Required    | What It Does                                                                                                                   | Notes                                       |
+|----------------------------------------|---------------------------|-------------|-------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------|
+| Network Dataset (from Map)             | Dropdown (GPString)       | Yes         | Selects the network dataset layer already added to the active map (e.g., Road\_ND).                                          | Must be added to map before running tool.   |
+| Facilities (Points)                    | Feature Layer (Point)     | Yes         | Defines origin locations for service area calculation.                                                                         | Examples: bus stops, banks, clinics.        |
+| Cutoff Type                            | Dropdown                  | Yes         | Determines whether service areas are calculated by time or distance.                                                         | Options: Time (minutes), Distance (meters). |
+| Travel Profile (approx)                | Dropdown                  | Conditional | Applies speed conversion for time-based cutoffs.                                                                               | Enabled only when Cutoff Type = Time.       |
+| Cutoffs                                | String (; separated)      | Yes         | Defines service area break values.                                                                                             | Example: 5;10;15.                           |
+| Output Geodatabase                     | Workspace (.gdb)          | Yes         | Location where all outputs are written.                                                                                        | Required.                                   |
+| Output Service Area Polygons Name      | String                    | No          | Name of exported service area polygon feature class.                                                                           | Default: ServiceAreaPolygons.               |
+| Census Polygons (optional)             | Feature Layer (Polygon)   | No          | Provides demographic data for accessibility weighting.                                                                         | Required for demographic analysis.          |
+| Census ID Field                        | String                    | Conditional | Unique identifier used for grouping (e.g., DGUID).                                                                             | Used in summary & pivot.                    |
+| Census Variable to Weight (optional)   | Dropdown (numeric fields) | Conditional | Selects demographic variable to proportionally weight (e.g., population, income).                                            | Enables weighted analysis.                  |
+| Output Intersect Feature Class Name    | String                    | No          | Name of service area × census intersection output.                                                                             | Default: MixedLayer.                        |
+
+---
+
+# Outputs
+
+| Output Name               | Type                      | Created When                | Contains                                                                                                                       |
+|--------------------------|---------------------------|-----------------------------|-------------------------------------------------------------------------------------------------------------------------------|
+| ServiceAreaPolygons      | Polygon Feature Class     | Always                      | Service area geometry with ToBreak field identifying rings.                                                                    |
+| MixedLayer               | Polygon Feature Class     | If Census Provided          | Intersection of service areas and census polygons. Includes INT\_A\_M2, Intersect\_Area, and weighted field (if selected).   |
+| RingByCensusSummary      | Table                     | If Census Variable Selected | Grouped by DGUID and ToBreak. Contains SUM\_Weighted\_\<Variable>.                                                             |
+| MixedLayer\_pivot        | Table                     | If Census Variable Selected | Pivot table with rows = DGUID, columns = service area breaks, values = summed weighted variable. Nulls replaced with 0.      |
+
+
 # 1. Core Workflow
 
 The tool performs four stages automatically:
